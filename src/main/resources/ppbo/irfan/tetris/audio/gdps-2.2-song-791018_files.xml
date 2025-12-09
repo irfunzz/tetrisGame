@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file name="791018.afpk" source="derivative">
+    <format>Columbia Peaks</format>
+    <original>791018.mp3</original>
+    <mtime>1712414355</mtime>
+    <size>10624</size>
+    <md5>59c78cc5fa88569f135564635327e7f8</md5>
+    <crc32>aa470034</crc32>
+    <sha1>d511172e1ede8617772ce05b5339fa106da671c8</sha1>
+  </file>
+  <file name="791018.mp3" source="original">
+    <mtime>1712414230</mtime>
+    <size>1028250</size>
+    <md5>e351a4214c2ca198d53fb7fe9b340762</md5>
+    <crc32>d5747efa</crc32>
+    <sha1>c00ed2921f1f4e108f965d8338ca94165e281b9d</sha1>
+    <format>VBR MP3</format>
+    <length>51.41</length>
+    <track>01</track>
+  </file>
+  <file name="791018.png" source="derivative">
+    <format>PNG</format>
+    <original>791018.mp3</original>
+    <mtime>1712414314</mtime>
+    <size>31193</size>
+    <md5>732bf2ffb93fbc24a45f1e495450cbd6</md5>
+    <crc32>93a570a6</crc32>
+    <sha1>bb073b55ec6cac18a5001f56de6eb7c66d8e3469</sha1>
+  </file>
+  <file name="791018_spectrogram.png" source="derivative">
+    <format>Spectrogram</format>
+    <original>791018.mp3</original>
+    <mtime>1712414328</mtime>
+    <size>293696</size>
+    <md5>d40b664cd0191b9601f5fcccdce20810</md5>
+    <crc32>8e1dc61e</crc32>
+    <sha1>e5dff08ff01ed0aca32771d782e5478dccebe2be</sha1>
+  </file>
+  <file name="__ia_thumb.jpg" source="original">
+    <mtime>1712414366</mtime>
+    <size>3703</size>
+    <md5>fe8998d4312fac4ba121695a13b1f62b</md5>
+    <crc32>4eed0036</crc32>
+    <sha1>d1327e41b443d3d04e76592c61ecd2dbe2bbb8b3</sha1>
+    <format>Item Tile</format>
+  </file>
+  <file name="gdps-2.2-song-791018_archive.torrent" source="metadata">
+    <btih>dd3fc2813d41859cc79946e5fb723d38ed55d1ed</btih>
+    <mtime>1712414367</mtime>
+    <size>2430</size>
+    <md5>3ea9696181b0fcbd2d10a948b5edbc2f</md5>
+    <crc32>95bdec68</crc32>
+    <sha1>9ca4aaca1b6ffc339e43ba91737ff1b659d8f5dc</sha1>
+    <format>Archive BitTorrent</format>
+  </file>
+  <file name="gdps-2.2-song-791018_files.xml" source="original">
+    <format>Metadata</format>
+    <md5>c1a5cbfd9da105fbb94b524965cdf80f</md5>
+    <summation>md5</summation>
+  </file>
+  <file name="gdps-2.2-song-791018_meta.sqlite" source="original">
+    <mtime>1712414257</mtime>
+    <size>20480</size>
+    <md5>0e505d9e276a0fb5babf497098129506</md5>
+    <crc32>6be35fe4</crc32>
+    <sha1>beeca621d898380f8cb5739fb9895911a3e08340</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="gdps-2.2-song-791018_meta.xml" source="original">
+    <mtime>1712414364</mtime>
+    <size>760</size>
+    <md5>f0961918196d7a63117d2f060a1825e8</md5>
+    <crc32>a0c1c914</crc32>
+    <sha1>8a49edd0f02a04e3f3e57e4bc55f7a7283175d27</sha1>
+    <format>Metadata</format>
+  </file>
+</files>
