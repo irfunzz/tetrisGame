@@ -1,5 +1,8 @@
 package ppbo.irfan.tetris;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Board {
 
     private static final int COLS = 10;
@@ -38,10 +41,10 @@ public class Board {
         return statusBlock[row][col];
     }
 
-    public int clearLines() {
-        int clearedLines = 0;
+    public List<Integer> clearLines() {
+        List<Integer> fullRows = new ArrayList<>();
 
-        for (int row = ROWS - 1; row >= 0; row--) {
+        for (int row = 0; row < ROWS; row++) {
             boolean fullLine = true;
             for (int col = 0; col < COLS; col++) {
                 if (!statusBlock[row][col]) {
@@ -49,22 +52,34 @@ public class Board {
                     break;
                 }
             }
-
             if (fullLine) {
-                clearedLines++;
-                for (int r = row; r > 0; r--) {
-                    for (int c = 0; c < COLS; c++) {
-                        statusBlock[r][c] = statusBlock[r - 1][c];
-                    }
-                }
-
-                for (int c = 0; c < COLS; c++) {
-                    statusBlock[0][c] = false;
-                }
-
-                row++;
+                fullRows.add(row);
             }
         }
-        return clearedLines;
+
+        if (fullRows.isEmpty()) {
+            return fullRows;
+        }
+
+        boolean[][] newStatus = new boolean[ROWS][COLS];
+        int dstRow = ROWS - 1;
+
+        for (int srcRow = ROWS - 1; srcRow >= 0; srcRow--) {
+            if (fullRows.contains(srcRow)) {
+                continue;
+            }
+
+            for (int col = 0; col < COLS; col++) {
+                newStatus[dstRow][col] = statusBlock[srcRow][col];
+            }
+            dstRow--;
+        }
+
+        statusBlock = newStatus;
+        return fullRows;
+    }
+
+    public int clearLinesCount() {
+        return clearLines().size();
     }
 }

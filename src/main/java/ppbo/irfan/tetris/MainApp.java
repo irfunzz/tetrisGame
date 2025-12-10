@@ -1,9 +1,13 @@
 package ppbo.irfan.tetris;
 
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
@@ -17,6 +21,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MainApp extends Application {
@@ -40,6 +46,7 @@ public class MainApp extends Application {
     private Label levelLabel;
     private Pane nextPane;
     private MediaPlayer bgmPlayer;
+    private MediaPlayer efcClear;
 
 
     private Pane createPane() {
@@ -72,11 +79,18 @@ public class MainApp extends Application {
         Media media = new Media(
                 getClass().getResource("/ppbo/irfan/tetris/audio/theme.mp3").toExternalForm()
         );
+        Media medias = new Media(
+                getClass().getResource("/ppbo/irfan/tetris/audio/clearEffect.mp3").toExternalForm()
+        );
 
         bgmPlayer = new MediaPlayer(media);
         bgmPlayer.setCycleCount(Timeline.INDEFINITE);
         bgmPlayer.setVolume(0.15);
         bgmPlayer.play();
+
+        efcClear = new MediaPlayer(medias);
+        efcClear.setVolume(0.6);
+
         nextPane = new Pane();
         nextPane.setPrefSize(4 * CELL_SIZE, 4 * CELL_SIZE);
         nextPane.setStyle("-fx-background-color: #333");
@@ -165,9 +179,9 @@ public class MainApp extends Application {
             if (c < minCol) minCol = c;
         }
 
-        int previewSize = CELL_SIZE ;
-        int offsetX = 1;
-        int offsetY = 1;
+        int previewSize = CELL_SIZE / 2;
+        int offsetX = (int) 3f;
+        int offsetY = (int) 3.5f;
         for (CellPosition cell : cells) {
             int normalizedRow = cell.getRow() - minRow;
             int normalizedCol = cell.getCol() - minCol;
@@ -220,10 +234,13 @@ public class MainApp extends Application {
 
             board.fillCell(row, col);
         }
-
-        int cleared = board.clearLines();
-        updateScoreAndLevel(cleared);
         redrawLockedBlocks();
+        List<Integer> clearedRows = board.clearLines();
+        int cleared = clearedRows.size();
+        updateScoreAndLevel(cleared);
+        if (cleared > 0) {
+            animateLineClear(clearedRows);
+        }
     }
 
     private void updateScoreAndLevel(int clearedLines) {
@@ -247,10 +264,11 @@ public class MainApp extends Application {
         }
 
         totalClearedLines += clearedLines;
-        int newLevel = 1 + totalClearedLines / 10;
+        int newLevel = 1 + totalClearedLines / 2;
         if (newLevel != level) {
             level = newLevel;
             updateSpeed();
+            updateAudioSpeed();
         }
 
         scoreLabel.setText("Score: " + score);
@@ -280,6 +298,16 @@ public class MainApp extends Application {
         timeline.play();
     }
 
+    private void updateAudioSpeed() {
+        double newRate = 1.0 + (level - 1) * 0.05;
+        if (newRate > 2.0) {
+            newRate = 2.0;
+        }
+
+        bgmPlayer.setRate(newRate);
+        efcClear.setRate(newRate);
+    }
+
     private void gameTick() {
         if (canMove(1, 0)) {
             currentTetromino.moveDown();
@@ -291,8 +319,7 @@ public class MainApp extends Application {
             nextTetromino = createRandomTetromino();
 
             if (!canMove(0, 0)) {
-                System.out.println("Game Over!");
-                timeline.stop();
+                showGameOverWindow();
                 return;
             }
 
@@ -344,12 +371,40 @@ public class MainApp extends Application {
             if (gamePane.getChildren().get(i) instanceof Rectangle) {
                 Rectangle r = (Rectangle) gamePane.getChildren().get(i);
                 if (r.getFill() == Color.BLUE && r.getStroke() == Color.DARKBLUE) {
-//                    r.setFill(Color.WHITE);
-//                    r.setStroke(Color.DARKGRAY);
                     gamePane.getChildren().remove(i);
                 }
             }
         }
+    }
+
+    private void animateLineClear(List<Integer> clearedRows) {
+        List<Rectangle> toFlash = new ArrayList<>();
+
+        for (int i = 0; i < gamePane.getChildren().size(); i++) {
+            if (gamePane.getChildren().get(i) instanceof Rectangle) {
+                Rectangle r = (Rectangle) gamePane.getChildren().get(i);
+
+                if (r.getFill() == Color.BLUE && r.getStroke() == Color.DARKBLUE) {
+                    int row = (int) (r.getY() / CELL_SIZE);
+                    if (clearedRows.contains(row)) {
+                        r.setFill(Color.WHITE);
+                        r.setStroke(Color.DARKGRAY);
+                        toFlash.add(r);
+                    }
+                }
+            }
+        }
+
+        PauseTransition pause = new PauseTransition(Duration.millis(250));
+        pause.setOnFinished(e -> {
+            efcClear.stop();
+            efcClear.seek(Duration.ZERO);
+            efcClear.setRate(bgmPlayer.getRate());
+            efcClear.play();
+            gamePane.getChildren().removeAll(toFlash);
+            redrawLockedBlocks();
+        });
+        pause.play();
     }
 
     private void redrawLockedBlocks() {
@@ -368,6 +423,57 @@ public class MainApp extends Application {
                     gamePane.getChildren().add(block);
                 }
             }
+        }
+    }
+
+    private void showGameOverWindow() {
+        if (timeline != null) {
+            timeline.stop();
+        }
+        if (bgmPlayer != null) {
+            bgmPlayer.pause();
+        }
+
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Game Over");
+            alert.setHeaderText("Game Over");
+            alert.setContentText("Score: " + score + "\nLevel: " + level);
+
+            ButtonType playAgain = new ButtonType("Play Again");
+            ButtonType exit = new ButtonType("Exit");
+
+            alert.getButtonTypes().setAll(playAgain, exit);
+
+            alert.showAndWait().ifPresent(result -> {
+                if (result == playAgain) {
+                    resetGame();
+                } else {
+                    Platform.exit();
+                }
+            });
+        });
+    }
+
+    private void resetGame() {
+        board = new Board();
+        score = 0;
+        level = 1;
+        totalClearedLines = 0;
+        clearLockedBlocksFromPane();
+        clearTetrominoFromPane();
+        currentTetromino = createRandomTetromino();
+        nextTetromino = createRandomTetromino();
+        drawTetromino(gamePane);
+        drawNextTetomino();
+        scoreLabel.setText("Score: " + score);
+        levelLabel.setText("Level: " + level);
+        if (timeline != null) {
+            timeline.stop();
+        }
+        createTimeline(500);
+        if (bgmPlayer != null) {
+            bgmPlayer.play();
         }
     }
 
