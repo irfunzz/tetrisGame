@@ -1,7 +1,18 @@
 package ppbo.irfan.tetris;
 
+/**
+ * Kelas yang merepresentasikan tetromino berbentuk O (kotak).
+ * Terdiri dari 4 sel yang membentuk kotak 2x2.
+ * Bentuk ini tidak mengalami perubahan saat dirotasi.
+ */
 public class OShape extends Tetromino{
 
+    /**
+     * Konstruktor untuk membuat tetromino bentuk O pada posisi awal.
+     *
+     * @param startRow posisi baris awal
+     * @param startCol posisi kolom awal
+     */
     public OShape(int startRow, int startCol) {
         super(startRow, startCol);
         offsets[0] = new CellPosition(0, 0);

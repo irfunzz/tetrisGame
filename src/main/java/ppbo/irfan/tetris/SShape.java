@@ -1,6 +1,16 @@
 package ppbo.irfan.tetris;
 
+/**
+ * Kelas yang merepresentasikan tetromino berbentuk S.
+ * Terdiri dari 4 sel dengan bentuk seperti huruf S yang terbalik.
+ */
 public class SShape extends Tetromino{
+    /**
+     * Konstruktor untuk membuat tetromino bentuk S pada posisi awal.
+     *
+     * @param startRow posisi baris awal
+     * @param startCol posisi kolom awal
+     */
     public SShape(int startRow, int startCol) {
         super(startRow, startCol);
         offsets[0] = new CellPosition(0, 0);

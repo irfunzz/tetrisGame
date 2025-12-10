@@ -1,3 +1,8 @@
+/**
+ * Modul aplikasi permainan Tetris berbasis JavaFX.
+ * Modul ini berisi implementasi lengkap permainan Tetris termasuk
+ * logika permainan, antarmuka pengguna, dan pengelolaan media.
+ */
 module ppbo.irfan.tetris {
     requires javafx.controls;
     requires javafx.fxml;

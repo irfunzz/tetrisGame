@@ -1,13 +1,24 @@
 package ppbo.irfan.tetris;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
+/**
+ * Kelas pengujian untuk memvalidasi fungsionalitas class Board.
+ * Berisi unit test untuk operasi papan permainan seperti validasi sel,
+ * pengisian sel, dan penghapusan baris.
+ */
 public class BoardTest {
 
+    /**
+     * Menguji method isValidCell untuk memastikan validasi batas papan berfungsi dengan benar.
+     * Memverifikasi bahwa sel dalam batas papan dikembalikan sebagai valid
+     * dan sel di luar batas dikembalikan sebagai tidak valid.
+     */
     @Test
     void testIsValidCell() {
         Board board = new Board();
@@ -21,6 +32,12 @@ public class BoardTest {
         assertFalse(board.isValidCell(0, 10));
     }
 
+    /**
+     * Menguji method fillCell dan isFilled untuk memastikan pengisian
+     * dan pemeriksaan status sel berfungsi dengan benar.
+     * Memverifikasi bahwa sel yang diisi ditandai sebagai terisi
+     * dan sel lain tetap kosong.
+     */
     @Test
     void testFillCellAndIsFilled() {
         Board board = new Board();
@@ -33,6 +50,11 @@ public class BoardTest {
         assertFalse(board.isFilled(4, 5));
     }
 
+    /**
+     * Menguji penghapusan satu baris penuh.
+     * Memverifikasi bahwa baris yang telah penuh terdeteksi dan dihapus dengan benar,
+     * serta sel-sel pada baris tersebut menjadi kosong setelah dihapus.
+     */
     @Test
     void testClearSingleLine() {
         Board board = new Board();
@@ -51,6 +73,11 @@ public class BoardTest {
         }
     }
 
+    /**
+     * Menguji penghapusan beberapa baris penuh sekaligus.
+     * Memverifikasi bahwa semua baris penuh terdeteksi dan dihapus dengan benar,
+     * serta baris-baris di atasnya turun untuk mengisi ruang kosong.
+     */
     @Test
     void testClearMultipleLines() {
         Board board = new Board();

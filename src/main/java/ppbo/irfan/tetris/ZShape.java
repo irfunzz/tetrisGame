@@ -1,6 +1,16 @@
 package ppbo.irfan.tetris;
 
+/**
+ * Kelas yang merepresentasikan tetromino berbentuk Z.
+ * Terdiri dari 4 sel dengan bentuk seperti huruf Z.
+ */
 public class ZShape extends Tetromino{
+    /**
+     * Konstruktor untuk membuat tetromino bentuk Z pada posisi awal.
+     *
+     * @param startRow posisi baris awal
+     * @param startCol posisi kolom awal
+     */
     public ZShape(int startRow, int startCol) {
         super(startRow, startCol);
         offsets[0] = new CellPosition(0, 0);

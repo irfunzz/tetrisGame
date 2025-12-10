@@ -1,6 +1,16 @@
 package ppbo.irfan.tetris;
 
+/**
+ * Kelas yang merepresentasikan tetromino berbentuk T.
+ * Terdiri dari 4 sel dengan bentuk seperti huruf T.
+ */
 public class TShape extends Tetromino {
+    /**
+     * Konstruktor untuk membuat tetromino bentuk T pada posisi awal.
+     *
+     * @param startRow posisi baris awal
+     * @param startCol posisi kolom awal
+     */
     public TShape(int startRow, int startCol) {
         super(startRow, startCol);
         offsets[0] = new CellPosition(1, 1);

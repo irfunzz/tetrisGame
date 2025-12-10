@@ -1,5 +1,10 @@
 package ppbo.irfan.tetris;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
@@ -20,39 +25,123 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+/**
+ * Kelas utama aplikasi permainan Tetris berbasis JavaFX.
+ * Mengelola tampilan antarmuka pengguna, logika permainan, skor, level,
+ * animasi, kontrol input, dan media audio.
+ */
 public class MainApp extends Application {
 
+    /**
+     * Jumlah kolom pada papan permainan.
+     */
     private static final int COLS = 10;
+
+    /**
+     * Jumlah baris pada papan permainan.
+     */
     private static final int ROWS = 20;
+
+    /**
+     * Ukuran setiap sel dalam pixel.
+     */
     private static final int CELL_SIZE = 40;
 
+    /**
+     * Tetromino yang sedang aktif dan dapat dikendalikan pemain.
+     */
     private Tetromino currentTetromino;
+
+    /**
+     * Tetromino berikutnya yang akan muncul setelah tetromino saat ini terkunci.
+     */
     private Tetromino nextTetromino;
+
+    /**
+     * Objek papan permainan yang menyimpan status sel-sel.
+     */
     private Board board;
+
+    /**
+     * Timeline untuk mengatur kecepatan jatuh tetromino secara otomatis.
+     */
     private Timeline timeline;
 
+    /**
+     * Skor pemain saat ini.
+     */
     private int score = 0;
+
+    /**
+     * Level permainan saat ini yang mempengaruhi kecepatan jatuh.
+     */
     private int level = 1;
+
+    /**
+     * Total jumlah baris yang telah berhasil dihapus.
+     */
     private int totalClearedLines = 0;
 
+    /**
+     * Panel utama tempat menggambar papan permainan dan tetromino.
+     */
     private Pane gamePane;
+
+    /**
+     * Panel samping yang berisi informasi skor, level, waktu, dan preview tetromino.
+     */
     private VBox sideBar;
+
+    /**
+     * Label untuk menampilkan skor pemain.
+     */
     private Label scoreLabel;
+
+    /**
+     * Label untuk menampilkan level permainan.
+     */
     private Label levelLabel;
+
+    /**
+     * Panel untuk menampilkan preview tetromino berikutnya.
+     */
     private Pane nextPane;
+
+    /**
+     * MediaPlayer untuk memutar musik latar belakang.
+     */
     private MediaPlayer bgmPlayer;
+
+    /**
+     * MediaPlayer untuk memutar efek suara penghapusan baris.
+     */
     private MediaPlayer efcClear;
+
+    /**
+     * Label untuk menampilkan waktu bermain.
+     */
     private Label timeLabel;
 
+    /**
+     * Flag untuk mengontrol status thread timer.
+     */
     private volatile boolean timerRunning = false;
+
+    /**
+     * Thread untuk menghitung waktu bermain secara terpisah.
+     */
     private Thread timerThread;
+
+    /**
+     * Waktu bermain yang telah berlalu dalam detik.
+     */
     private int elapsedSeconds = 0;
 
+    /**
+     * Membuat panel permainan dengan grid kotak-kotak untuk papan Tetris.
+     *
+     * @return objek Pane yang berisi grid permainan
+     */
     private Pane createPane() {
         Pane root = new Pane();
         root.setPrefSize(COLS * CELL_SIZE, ROWS * CELL_SIZE);
@@ -74,6 +163,14 @@ public class MainApp extends Application {
         return root;
     }
 
+    /**
+     * Metode inisialisasi dan peluncuran aplikasi JavaFX.
+     * Menginisialisasi papan permainan, komponen UI, media audio,
+     * event handler untuk input keyboard, dan timeline untuk game loop.
+     *
+     * @param stage stage utama aplikasi JavaFX
+     * @throws IOException jika terjadi kesalahan dalam memuat resource
+     */
     @Override
     public void start(Stage stage) throws IOException {
         gamePane = createPane();
@@ -154,6 +251,13 @@ public class MainApp extends Application {
 
     }
 
+    /**
+     * Menggambar tetromino yang sedang aktif pada panel permainan.
+     * Menghapus gambar tetromino sebelumnya dan menggambar ulang
+     * pada posisi terbaru.
+     *
+     * @param root panel tempat tetromino akan digambar
+     */
     public void drawTetromino(Pane root) {
         clearTetrominoFromPane();
         CellPosition[] cells = currentTetromino.getCells();
@@ -171,6 +275,11 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Menggambar preview tetromino berikutnya pada panel sidebar.
+     * Menampilkan bentuk tetromino yang akan muncul setelah
+     * tetromino saat ini terkunci.
+     */
     private void drawNextTetomino() {
         nextPane.getChildren().clear();
 
@@ -205,6 +314,10 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Menghapus gambar tetromino yang sedang aktif dari panel permainan.
+     * Menghapus semua Rectangle yang memiliki warna hijau (tetromino aktif).
+     */
     private void clearTetrominoFromPane() {
         for (int i = gamePane.getChildren().size() - 1; i >= 0 ; i--) {
             if (gamePane.getChildren().get(i) instanceof Rectangle) {
@@ -216,6 +329,14 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Memeriksa apakah tetromino dapat bergerak ke posisi baru.
+     * Validasi dilakukan terhadap batas papan dan sel yang sudah terisi.
+     *
+     * @param dRow perubahan posisi baris (delta row)
+     * @param dCol perubahan posisi kolom (delta column)
+     * @return true jika tetromino dapat bergerak, false jika tidak
+     */
     private boolean canMove(int dRow, int dCol) {
         CellPosition[] cells = currentTetromino.getCells();
         for (int i = 0; i < cells.length; i++) {
@@ -231,6 +352,12 @@ public class MainApp extends Application {
         return true;
     }
 
+    /**
+     * Mengunci tetromino saat ini pada papan permainan.
+     * Menandai sel-sel yang ditempati tetromino sebagai terisi,
+     * menggambar ulang blok yang terkunci, dan memeriksa baris
+     * yang dapat dihapus.
+     */
     private void lockCurrentTetromino() {
 
         CellPosition[] cells = currentTetromino.getCells();
@@ -251,6 +378,13 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Memperbarui skor dan level berdasarkan jumlah baris yang dihapus.
+     * Skor dihitung berdasarkan jumlah baris yang dihapus sekaligus dan level saat ini.
+     * Level meningkat setiap 2 baris yang berhasil dihapus.
+     *
+     * @param clearedLines jumlah baris yang berhasil dihapus
+     */
     private void updateScoreAndLevel(int clearedLines) {
         if (clearedLines <= 0) return;
 
@@ -283,6 +417,11 @@ public class MainApp extends Application {
         levelLabel.setText("Level: " + level);
     }
 
+    /**
+     * Membuat timeline untuk game loop yang mengatur kecepatan jatuh tetromino.
+     *
+     * @param millis interval waktu dalam milidetik untuk setiap tick permainan
+     */
     private void createTimeline(double millis) {
         timeline = new Timeline(
                 new KeyFrame(Duration.millis(millis), e -> gameTick())
@@ -291,6 +430,10 @@ public class MainApp extends Application {
         timeline.play();
     }
 
+    /**
+     * Memperbarui kecepatan jatuh tetromino berdasarkan level saat ini.
+     * Semakin tinggi level, semakin cepat tetromino jatuh.
+     */
     private void updateSpeed() {
         double baseMillis = 500;
         double newMillis = baseMillis - (level - 1) * 50;
@@ -306,6 +449,10 @@ public class MainApp extends Application {
         timeline.play();
     }
 
+    /**
+     * Memperbarui kecepatan pemutaran audio background dan efek suara
+     * sesuai dengan level permainan saat ini.
+     */
     private void updateAudioSpeed() {
         double newRate = 1.0 + (level - 1) * 0.05;
         if (newRate > 2.0) {
@@ -316,6 +463,12 @@ public class MainApp extends Application {
         efcClear.setRate(newRate);
     }
 
+    /**
+     * Melakukan satu iterasi game loop.
+     * Menggerakkan tetromino ke bawah, atau mengunci tetromino
+     * dan membuat yang baru jika tidak dapat bergerak.
+     * Memeriksa kondisi game over jika tetromino baru tidak dapat ditempatkan.
+     */
     private void gameTick() {
         if (canMove(1, 0)) {
             currentTetromino.moveDown();
@@ -336,6 +489,12 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Membuat tetromino secara acak dari tujuh bentuk yang tersedia.
+     * Posisi awal tetromino disesuaikan dengan bentuknya.
+     *
+     * @return objek Tetromino dengan bentuk acak
+     */
     private Tetromino createRandomTetromino() {
         Random r = new Random();
         int random = r.nextInt(7) + 1;
@@ -359,6 +518,11 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Mencoba merotasi tetromino saat ini.
+     * Jika rotasi menyebabkan tabrakan, rotasi dibatalkan
+     * dan tetromino dikembalikan ke posisi semula.
+     */
     private void tryRotateTetromino() {
         CellPosition[] backupOffsets = currentTetromino.getOffsetsCopy();
         int bakcupState = currentTetromino.getRotationState();
@@ -374,6 +538,10 @@ public class MainApp extends Application {
         drawTetromino(gamePane);
     }
 
+    /**
+     * Menghapus semua blok yang terkunci dari panel permainan.
+     * Menghapus Rectangle berwarna biru yang merepresentasikan blok terkunci.
+     */
     private void clearLockedBlocksFromPane() {
         for (int i = gamePane.getChildren().size() - 1; i >= 0 ; i--) {
             if (gamePane.getChildren().get(i) instanceof Rectangle) {
@@ -385,6 +553,13 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Menampilkan animasi penghapusan baris yang telah penuh.
+     * Blok pada baris yang dihapus diubah menjadi putih sebelum dihapus,
+     * disertai dengan efek suara.
+     *
+     * @param clearedRows daftar indeks baris yang akan dihapus
+     */
     private void animateLineClear(List<Integer> clearedRows) {
         List<Rectangle> toFlash = new ArrayList<>();
 
@@ -415,6 +590,10 @@ public class MainApp extends Application {
         pause.play();
     }
 
+    /**
+     * Menggambar ulang semua blok yang telah terkunci pada papan permainan.
+     * Membaca status papan dan menggambar Rectangle biru untuk setiap sel yang terisi.
+     */
     private void redrawLockedBlocks() {
         clearLockedBlocksFromPane();
 
@@ -434,6 +613,10 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Menampilkan dialog game over dengan informasi skor, level, dan waktu bermain.
+     * Memberikan opsi untuk bermain lagi atau keluar dari aplikasi.
+     */
     private void showGameOverWindow() {
         if (timeline != null) {
             timeline.stop();
@@ -464,6 +647,10 @@ public class MainApp extends Application {
         });
     }
 
+    /**
+     * Mereset permainan ke kondisi awal.
+     * Menginisialisasi ulang papan, skor, level, timer, dan tetromino.
+     */
     private void resetGame() {
         board = new Board();
         score = 0;
@@ -488,6 +675,10 @@ public class MainApp extends Application {
         startTimerThread();
     }
 
+    /**
+     * Memulai thread untuk menghitung waktu bermain.
+     * Timer berjalan di thread terpisah dan memperbarui label waktu setiap detik.
+     */
     private void startTimerThread() {
         timerRunning = true;
         elapsedSeconds = 0;
@@ -514,6 +705,11 @@ public class MainApp extends Application {
         timerThread.start();
     }
 
+    /**
+     * Metode utama untuk menjalankan aplikasi.
+     *
+     * @param args argumen command line
+     */
     public static void main(String[] args) {
         launch();
     }

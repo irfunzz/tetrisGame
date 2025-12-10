@@ -1,6 +1,16 @@
 package ppbo.irfan.tetris;
 
+/**
+ * Kelas yang merepresentasikan tetromino berbentuk J.
+ * Terdiri dari 4 sel dengan bentuk seperti huruf J.
+ */
 public class JShape extends Tetromino {
+    /**
+     * Konstruktor untuk membuat tetromino bentuk J pada posisi awal.
+     *
+     * @param startRow posisi baris awal
+     * @param startCol posisi kolom awal
+     */
     public JShape(int startRow, int startCol) {
         super(startRow, startCol);
         offsets[0] = new CellPosition(0, 0);
