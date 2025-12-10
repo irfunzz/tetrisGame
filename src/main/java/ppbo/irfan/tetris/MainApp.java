@@ -47,7 +47,11 @@ public class MainApp extends Application {
     private Pane nextPane;
     private MediaPlayer bgmPlayer;
     private MediaPlayer efcClear;
+    private Label timeLabel;
 
+    private volatile boolean timerRunning = false;
+    private Thread timerThread;
+    private int elapsedSeconds = 0;
 
     private Pane createPane() {
         Pane root = new Pane();
@@ -76,6 +80,9 @@ public class MainApp extends Application {
 
         scoreLabel = new Label("Score: " + score);
         levelLabel = new Label("Level: " + level);
+        timeLabel = new Label("Time: 0s");
+        timeLabel.setTextFill(Color.WHITE);
+
         Media media = new Media(
                 getClass().getResource("/ppbo/irfan/tetris/audio/theme.mp3").toExternalForm()
         );
@@ -95,7 +102,7 @@ public class MainApp extends Application {
         nextPane.setPrefSize(4 * CELL_SIZE, 4 * CELL_SIZE);
         nextPane.setStyle("-fx-background-color: #333");
 
-        sideBar = new VBox(20, scoreLabel, levelLabel, nextPane);
+        sideBar = new VBox(20, scoreLabel, levelLabel, timeLabel, nextPane);
         sideBar.setStyle("-fx-padding: 10; -fx-background-color: #222; -fx-text-fill: white;");
         scoreLabel.setTextFill(Color.WHITE);
         levelLabel.setTextFill(Color.WHITE);
@@ -138,6 +145,7 @@ public class MainApp extends Application {
         drawTetromino(gamePane);
         drawNextTetomino();
         createTimeline(500);
+        startTimerThread();;
 
         stage.setTitle("Tetris!");
         stage.setResizable(false);
@@ -433,12 +441,13 @@ public class MainApp extends Application {
         if (bgmPlayer != null) {
             bgmPlayer.pause();
         }
+        timerRunning = false;
 
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Game Over");
             alert.setHeaderText("Game Over");
-            alert.setContentText("Score: " + score + "\nLevel: " + level);
+            alert.setContentText("Score: " + score + "\nLevel: " + level + "\nTime: " + elapsedSeconds + "s");
 
             ButtonType playAgain = new ButtonType("Play Again");
             ButtonType exit = new ButtonType("Exit");
@@ -459,6 +468,7 @@ public class MainApp extends Application {
         board = new Board();
         score = 0;
         level = 1;
+        elapsedSeconds = 0;
         totalClearedLines = 0;
         clearLockedBlocksFromPane();
         clearTetrominoFromPane();
@@ -475,6 +485,33 @@ public class MainApp extends Application {
         if (bgmPlayer != null) {
             bgmPlayer.play();
         }
+        startTimerThread();
+    }
+
+    private void startTimerThread() {
+        timerRunning = true;
+        elapsedSeconds = 0;
+        if (timeLabel != null) {
+            timeLabel.setText("Time: 0 s");
+        }
+        timerThread = new Thread(() -> {
+            while (timerRunning) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+                if (!timerRunning) break;
+                elapsedSeconds++;
+                int display = elapsedSeconds;
+
+                Platform.runLater(() -> {
+                    timeLabel.setText("Time: " + display + " s");
+                });
+            }
+        });
+        timerThread.setDaemon(true);
+        timerThread.start();
     }
 
     public static void main(String[] args) {
